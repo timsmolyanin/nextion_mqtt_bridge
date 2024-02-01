@@ -19,8 +19,6 @@ class Mqtt(Thread):
         self.topic_list = topic_list
         self.on_message_config = on_message_config
         
-    
-
 
     def connect_mqtt(self, whois: str) -> mqtt:
         logger.debug(f"MQTT client in {whois} started connect to broker")
