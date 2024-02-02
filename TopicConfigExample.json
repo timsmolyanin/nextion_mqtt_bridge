@@ -1,39 +1,58 @@
 {
 	"Test1": {
 		"Test1": {
-			"Range": "False",
-			"Condition": "False",
+			"Condition": "Default",
 			"Type": "txt",
 			"Cmd": ["PageName.TXT_WidgetName1.txt=", "PageName.TXT_WidgetName2.txt="]
 		},
 		"Test2": {
-			"Range": "False",
-			"Condition": "False",
+			"Condition": "Default",
 			"Type": "val",
 			"Cmd": ["PageName.VAL_CURRENT.val=", "PageName.VAL_CURENT.val="]
 		},
 		"Test3": {
-			"Condition": "True",
+			"Condition": "State",
 			"0": ["PageName.AnyWidgetName1.picc=33"],
 			"1": ["PageName.AnyWidgetName1.picc=31"]
 		},
 		"Test4": {
-			"Condition": "False",
-			"RangeNum": "3",
-			"Range1":{
-				"From": "1",
-				"To": "5",
-				"Cmd": ["PageName.AnyWidgetName1.picc=1"]
-			},
-			"Range2":{
-				"From": "6",
-				"To": "10",
-				"Cmd": ["PageName.AnyWidgetName1.picc=2"]
-			},
-			"Range3":{
-				"From": "11",
-				"To": "20",
-				"Cmd": ["PageName.AnyWidgetName1.picc=3"]
+			"Condition": "NonStrict Range",
+			"Ranges" : {
+				"Range1":{
+					"From": 1,
+					"To": 5,
+					"Cmd": ["PageName.AnyWidgetName1.picc=1"]
+				},
+				"Range2":{
+					"From": 6,
+					"To": 10,
+					"Cmd": ["PageName.AnyWidgetName1.picc=2"]
+				},
+				"Range3":{
+					"From": 11.5,
+					"To": 22.1,
+					"Cmd": ["PageName.AnyWidgetName1.picc=3"]
+				}
+			}
+		},
+		"Test5": {
+			"Condition": "Strict Range",
+			"Ranges" : {
+				"Range1":{
+					"From": 1.2,
+					"To": 5.3,
+					"Cmd": ["PageName.AnyWidgetName1.picc=1"]
+				},
+				"Range2":{
+					"From": 6,
+					"To": 10,
+					"Cmd": ["PageName.AnyWidgetName1.picc=2"]
+				},
+				"Range3":{
+					"From": 11.99,
+					"To": 22.1,
+					"Cmd": ["PageName.AnyWidgetName1.picc=3"]
+				}
 			}
 		}	
 	}

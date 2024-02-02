@@ -117,6 +117,7 @@ class NextionMqttBridge(Thread):
     def nextion_callback(self, data):
         data_list = data.split("/")
         self.mqtt_publish_topic(f"/devices/{data_list[0]}/controls/{data_list[1]}/on", data_list[-1])
+        #print Module/Current Voltage/on 1
     
 
     def error_handler(self):
