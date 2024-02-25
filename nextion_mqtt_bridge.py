@@ -31,7 +31,7 @@ class NextionMqttBridge(Thread):
         self.__port_is_open = False
         self.__serial_port_obj = None
 
-        config_file_path = "TopicConfig.json"
+        config_file_path = "NextionMqttBridgeConfig.json"
         config_file = open(config_file_path)
         config = json.loads(config_file.read())
 
@@ -64,7 +64,6 @@ class NextionMqttBridge(Thread):
                 self.__port_is_open = serial_port_obj.isOpen()
                 self.__serial_port_obj = serial_port_obj
                 logger.debug(f"Connection is succesfull! {self.__port_is_open}")
-                self.send_welcome_msg()
             except serial.serialutil.SerialException as exc:
                 logger.debug(f"Connection failed {self.__port_is_open}, {exc}")
                 self.__port_is_open = False
@@ -115,9 +114,9 @@ class NextionMqttBridge(Thread):
 
 
     def nextion_callback(self, data):
-        data_list = data.split("/")
-        self.mqtt_publish_topic(f"/devices/{data_list[0]}/controls/{data_list[1]}/on", data_list[-1])
-        #print Module/Current Voltage/on 1
+        topic_part_list = data.split("/")
+        # print(topic_part_list)
+        self.mqtt_publish_topic(f"/{topic_part_list[1]}/{topic_part_list[2]}/{topic_part_list[3]}/{topic_part_list[4]}/{topic_part_list[5]}", topic_part_list[-1])
     
 
     def error_handler(self):
@@ -158,7 +157,6 @@ class NextionMqttBridge(Thread):
         except Exception as e:
             print(e)
     
-
     def send_welcome_msg(self):
         next_page_cmd = "page MainMenu"
         self.serial_write(next_page_cmd)
@@ -172,7 +170,7 @@ class NextionMqttBridge(Thread):
         try:
             self.topic_executor.execute(topic_name[2], topic_name[-1], topic_value)
         except Exception as e:
-            print(e)
+            print("on_message ", e)
 
     
     def mqtt_start(self):
@@ -192,11 +190,11 @@ class NextionMqttBridge(Thread):
 
 
 def test():
-    # comport = "COM10"
-    comport = "/dev/ttyS4"
+    comport = "COM3"
+    # comport = "/dev/ttyS4"
     baudrate = 115200
-    broker = "127.0.0.1"
     # broker = "127.0.0.1"
+    broker = "192.168.44.10"
     port = 1883
     nextion_mqtt_bridge = NextionMqttBridge(mqtt_port=port, mqtt_broker=broker, mqtt_passw=None, mqtt_user=None,
                                             comport_baudrate=baudrate, comport_name=comport)

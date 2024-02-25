@@ -23,9 +23,8 @@ class TopicExecutor:
                     for cmd in cmds:
                         full_cmd = f'{cmd}{topic_value}'
                         self.nextion_mqtt_bridge.serial_write(full_cmd)
-
             except Exception as e:
-                print(e)
+                print("module['Condition'] == 'Default'", e)
           
 
         if module['Condition'] == 'State':
@@ -38,14 +37,14 @@ class TopicExecutor:
 
 
         if module['Condition'] == 'NonStrict Range':
-            for range in module['Ranges']:
-                if module[range]['From'] <= topic_value <= module[range]['To']:
+            for range in module['Ranges'].values():
+                if int(range['From']) <= int(topic_value) <= int(range['To']):
                     try:
-                        cmds = module[range]["Cmd"]
+                        cmds = range["Cmd"]
                         for cmd in cmds:
                             self.nextion_mqtt_bridge.serial_write(cmd)
                     except Exception as e:
-                        print(e)
+                        print("sadsad", e)
                 
         if module['Condition'] == 'Strict Range':
             for range in module['Ranges']:
