@@ -1,0 +1,15 @@
+serial:
+  port: "COM9"
+  baudrate: 115200
+  timeout: 1
+  open_retry_interval: 5
+
+mqtt:
+  broker: "192.168.44.11"
+  port: 1883
+  username: null
+  password: null
+  topics_file: "config/mqtt_topics.yaml"
+
+topic_executor:
+  config_file: "config/topic_config.json"

@@ -1,60 +1,82 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class TopicExecutor:
-    
-    def __init__(self,nextion_mqtt_bridge, config):
-        self.nextion_mqtt_bridge = nextion_mqtt_bridge
-        
+    def __init__(self, serial_interface, config):
+        self.serial = serial_interface
         self.config = config
-    
-    def execute(self, group_name, module_name, topic_value):
+
+    def execute(self, topic, value):
         try:
-            module = self.config[group_name][module_name]
-        except KeyError:
-            raise KeyError('Ключ не найден, топик не прописан', group_name, module_name)
-        
-        if module['Condition'] == 'Default':
-            try:
-                cmds = module["Cmd"]
-                if module["Type"] == 'txt':
-                    for cmd in cmds:
-                        full_cmd = f'{cmd}\"{topic_value}\"'
-                        self.nextion_mqtt_bridge.serial_write(full_cmd)
-                
-                if module["Type"] == 'val':
-                    for cmd in cmds:
-                        full_cmd = f'{cmd}{topic_value}'
-                        self.nextion_mqtt_bridge.serial_write(full_cmd)
+            module = self.find_module(topic)
+            condition = module['Condition']
+            if condition == 'Default':
+                self.handle_default(module, value)
+            elif condition == 'State':
+                self.handle_state(module, value)
+            elif condition == 'NonStrict Range':
+                self.handle_non_strict_range(module, value)
+            elif condition == 'Strict Range':
+                self.handle_strict_range(module, value)
+            else:
+                logger.error(f"Unknown condition type: {condition}")
+        except Exception as e:
+            logger.error(f"Error while processing a topic {topic}: {e}")
 
-            except Exception as e:
-                print(e)
-          
+    def find_module(self, topic):
+        # expected topic format: /devices/{group}/controls/{module}
+        topic_parts = topic.strip('/').split('/')
+        if len(topic_parts) < 4:
+            raise ValueError(f"Incorrect topic fromat: {topic}")
+        _, group, _, module = topic_parts[:4]
 
-        if module['Condition'] == 'State':
-            try:
-                cmds = module[str(topic_value)]
-            except KeyError:
-                raise KeyError('Состояния "' + str(topic_value) + '" в модуле "' + module_name + '" не существует. Группа: "' + group_name + '"')
+        group_config = self.config.get(group)
+        if not group_config:
+            raise KeyError(f"The group '{group}' is not found in configuration")
+        module_config = group_config.get(module)
+        if not module_config:
+            raise KeyError(f"The module '{module}' is not found in configuration '{group}'")
+        return module_config
+
+    def handle_default(self, module, value):
+        cmds = module['Cmd']
+        cmd_type = module['Type']
+        for cmd in cmds:
+            if cmd_type == 'txt':
+                full_cmd = f'{cmd}"{value}"'
+            elif cmd_type == 'val':
+                full_cmd = f'{cmd}{value}'
+            else:
+                logger.error(f"Unkown command type: {cmd_type}")
+                continue
+            self.serial.write(full_cmd)
+
+    def handle_state(self, module, value):
+        cmds = module.get(value)
+        if cmds:
             for cmd in cmds:
-                self.nextion_mqtt_bridge.serial_write(cmd)
+                self.serial.write(cmd)
+        else:
+            logger.error(f"State '{value}' is not found in module")
 
+    def handle_non_strict_range(self, module, value):
+        try:
+            value = float(value)
+            for range_config in module['Ranges'].values():
+                if float(range_config['From']) <= value <= float(range_config['To']):
+                    for cmd in range_config['Cmd']:
+                        self.serial.write(cmd)
+        except ValueError:
+            logger.error(f"Invalid value for range comparison: {value}")
 
-        if module['Condition'] == 'NonStrict Range':
-            for range in module['Ranges']:
-                if module[range]['From'] <= topic_value <= module[range]['To']:
-                    try:
-                        cmds = module[range]["Cmd"]
-                        for cmd in cmds:
-                            self.nextion_mqtt_bridge.serial_write(cmd)
-                    except Exception as e:
-                        print(e)
-                
-        if module['Condition'] == 'Strict Range':
-            for range in module['Ranges']:
-                if module[range]['From'] < topic_value < module[range]['To']:
-                    try:
-                        cmds = module[range]["Cmd"]
-                        for cmd in cmds:
-                            self.nextion_mqtt_bridge.serial_write(cmd)
-                    except Exception as e:
-                        print(e)
-
-        
+    def handle_strict_range(self, module, value):
+        try:
+            value = float(value)
+            for range_config in module['Ranges'].values():
+                if float(range_config['From']) < value < float(range_config['To']):
+                    for cmd in range_config['Cmd']:
+                        self.serial.write(cmd)
+        except ValueError:
+            logger.error(f"Invalid value for range comparison: {value}")

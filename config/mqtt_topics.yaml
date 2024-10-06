@@ -1,0 +1,6 @@
+- topic: "/devices/wb-mrwm2_129/controls/K1"
+  qos: 2
+- topic: "/devices/wb-mrwm2_129/controls/K2"
+  qos: 2
+- topic: "/devices/0x00158d008b10d556/controls/state_l1"
+  qos: 2
