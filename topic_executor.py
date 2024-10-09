@@ -1,4 +1,5 @@
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,8 @@ class TopicExecutor:
                 self.handle_non_strict_range(module, value)
             elif condition == 'Strict Range':
                 self.handle_strict_range(module, value)
+            elif condition == 'Transform':
+                self.handle_transform_payload(module, value)
             else:
                 logger.error(f"Unknown condition type: {condition}")
         except Exception as e:
@@ -80,3 +83,14 @@ class TopicExecutor:
                         self.serial.write(cmd)
         except ValueError:
             logger.error(f"Invalid value for range comparison: {value}")
+    
+    def handle_transform_payload(self, module, value):
+        try:
+            payload_dict = json.loads(value)
+            for var, value in payload_dict.items():
+                cmd = module.get(var)[0]
+                full_cmd = f'{cmd}"{value}"' 
+                self.serial.write(full_cmd)
+        except Exception as e:
+            logger.error(f"handle_transform_payload {e}")
+        
