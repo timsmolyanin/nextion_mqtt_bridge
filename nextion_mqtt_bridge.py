@@ -15,10 +15,10 @@ class NextionMqttBridge:
 
     def start(self):
         self.mqtt.set_on_message_callback(self.on_mqtt_message)
+        self.serial.connect()
         self.mqtt.connect()
         self.mqtt.subscribe_to_topics()
         self.mqtt.loop_start()  # Start the MQTT client in a background thread
-        self.serial.connect()
 
         self.read_from_serial()
 
