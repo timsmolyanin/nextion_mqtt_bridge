@@ -21,5 +21,6 @@ def main():
     bridge = NextionMqttBridge(config)
     bridge.start()
 
+
 if __name__ == '__main__':
     main()

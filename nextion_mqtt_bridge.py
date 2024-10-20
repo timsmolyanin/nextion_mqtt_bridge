@@ -31,7 +31,7 @@ class NextionMqttBridge:
 
     def handle_serial_data(self, data):
         try:
-            array_data = data.split(":")
+            array_data = data.split("%")
             if len(array_data) != 3:
                 logger.error(f"Invalid data format from serial port: {data}")
                 return

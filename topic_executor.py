@@ -88,9 +88,9 @@ class TopicExecutor:
         try:
             payload_dict = json.loads(value)
             for var, value in payload_dict.items():
-                cmd = module.get(var)[0]
-                full_cmd = f'{cmd}"{value}"' 
-                self.serial.write(full_cmd)
+                for cmd in module.get(var):
+                    full_cmd = f'{cmd}"{value}"' 
+                    self.serial.write(full_cmd)
         except Exception as e:
             logger.error(f"handle_transform_payload {e}")
         
